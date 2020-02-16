@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkCMF [ WE CAN DO IT MORE SIMPLE ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2013-2018 http://www.thinkcmf.com All rights reserved.
+// | Copyright (c) 2013-2019 http://www.thinkcmf.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +---------------------------------------------------------------------
@@ -10,43 +10,39 @@
 // +----------------------------------------------------------------------
 namespace cmf\controller;
 
-use think\Controller;
-use think\Request;
-use think\View;
-use think\Config;
 use think\Container;
+use think\Controller;
+use think\Db;
+use think\facade\View;
+use think\facade\Config;
 
 class BaseController extends Controller
 {
     /**
-     * 构造函数
-     * @param Request $request Request对象
-     * @access public
+     * BaseController constructor.
      */
     public function __construct()
     {
-        $this->request = Container::get('request');
+        $this->app     = Container::get('app');
+        $this->request = $this->app['request'];
 
         if (!cmf_is_installed() && $this->request->module() != 'install') {
-            header('Location: ' . cmf_get_root() . '/?s=install');
-            exit;
+            return $this->redirect(cmf_get_root() . '/?s=install');
         }
 
-        $this->app = Container::get('app');
         $this->_initializeView();
-        $this->view = Container::get('view')->init(
-            $this->app['config']->pull('template')
-        );
+        $this->view = View::init(Config::get('template.'));
 
         // 控制器初始化
         $this->initialize();
 
-        // 前置操作方法
+        // 前置操作方法 即将废弃
         foreach ((array)$this->beforeActionList as $method => $options) {
             is_numeric($method) ?
                 $this->beforeAction($options) :
                 $this->beforeAction($method, $options);
         }
+
     }
 
 
@@ -60,23 +56,24 @@ class BaseController extends Controller
      */
     protected function listOrders($model)
     {
-        if (!is_object($model)) {
-            return false;
+        $modelName = '';
+        if (is_object($model)) {
+            $modelName = $model->getName();
+        } else {
+            $modelName = $model;
         }
 
-        $pk  = $model->getPk(); //获取主键名称
+        $pk  = Db::name($modelName)->getPk(); //获取主键名称
         $ids = $this->request->post("list_orders/a");
 
         if (!empty($ids)) {
             foreach ($ids as $key => $r) {
                 $data['list_order'] = $r;
-                $model->where([$pk => $key])->update($data);
+                Db::name($modelName)->where($pk, $key)->update($data);
             }
-
         }
 
         return true;
     }
-
 
 }

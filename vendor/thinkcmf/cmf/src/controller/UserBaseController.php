@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkCMF [ WE CAN DO IT MORE SIMPLE ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2013-2018 http://www.thinkcmf.com All rights reserved.
+// | Copyright (c) 2013-2019 http://www.thinkcmf.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +---------------------------------------------------------------------
@@ -13,9 +13,9 @@ namespace cmf\controller;
 class UserBaseController extends HomeBaseController
 {
 
-    public function _initialize()
+    public function initialize()
     {
-        parent::_initialize();
+        parent::initialize();
         $this->checkUserLogin();
     }
 

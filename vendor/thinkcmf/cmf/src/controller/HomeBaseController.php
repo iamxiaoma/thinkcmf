@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkCMF [ WE CAN DO IT MORE SIMPLE ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2013-2018 http://www.thinkcmf.com All rights reserved.
+// | Copyright (c) 2013-2019 http://www.thinkcmf.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +---------------------------------------------------------------------
@@ -12,23 +12,23 @@ namespace cmf\controller;
 
 use think\Db;
 use app\admin\model\ThemeModel;
-use think\View;
+use think\facade\View;
 
 class HomeBaseController extends BaseController
 {
 
-    public function _initialize()
+    protected function initialize()
     {
         // 监听home_init
         hook('home_init');
-        parent::_initialize();
+        parent::initialize();
         $siteInfo = cmf_get_site_info();
         View::share('site_info', $siteInfo);
     }
 
-    public function _initializeView()
+    protected function _initializeView()
     {
-        $cmfThemePath    = config('cmf_theme_path');
+        $cmfThemePath    = config('template.cmf_theme_path');
         $cmfDefaultTheme = cmf_get_current_theme();
 
         $themePath = "{$cmfThemePath}{$cmfDefaultTheme}";
@@ -53,9 +53,8 @@ class HomeBaseController extends BaseController
             ];
         }
 
-//        $viewReplaceStr = array_merge(config('tpl_replace_string'), $viewReplaceStr);
-        config('template.view_base', "{$themePath}/");
-        config('tpl_replace_string', $viewReplaceStr);
+        config('template.view_base', WEB_ROOT . "{$themePath}/");
+        config('template.tpl_replace_string', $viewReplaceStr);
 
         $themeErrorTmpl = "{$themePath}/error.html";
         if (file_exists_case($themeErrorTmpl)) {
@@ -74,18 +73,48 @@ class HomeBaseController extends BaseController
      * 加载模板输出
      * @access protected
      * @param string $template 模板文件名
-     * @param array $vars 模板输出变量
-     * @param array $replace 模板替换
-     * @param array $config 模板参数
+     * @param array  $vars     模板输出变量
+     * @param array  $config   模板参数
      * @return mixed
      */
-    protected function fetch($template = '', $vars = [], $replace = [], $config = [])
+    protected function fetch($template = '', $vars = [], $config = [])
     {
         $template = $this->parseTemplate($template);
         $more     = $this->getThemeFileMore($template);
         $this->assign('theme_vars', $more['vars']);
         $this->assign('theme_widgets', $more['widgets']);
-        return parent::fetch($template, $vars, $replace, $config);
+        $content = $this->view->fetch($template, $vars, $config);
+
+        $designingTheme = cookie('cmf_design_theme');
+
+        if ($designingTheme) {
+            $app        = $this->request->module();
+            $controller = $this->request->controller();
+            $action     = $this->request->action();
+
+            $output = <<<hello
+<script>
+var _themeDesign=true;
+var _themeTest="test";
+var _app='{$app}';
+var _controller='{$controller}';
+var _action='{$action}';
+var _themeFile='{$more['file']}';
+if(parent && parent.simulatorRefresh){
+  parent.simulatorRefresh();  
+}
+</script>
+hello;
+
+            $pos = strripos($content, '</body>');
+            if (false !== $pos) {
+                $content = substr($content, 0, $pos) . $output . substr($content, $pos);
+            } else {
+                $content = $content . $output;
+            }
+        }
+
+        return $content;
     }
 
     /**
@@ -109,9 +138,9 @@ class HomeBaseController extends BaseController
         if ($viewBase) {
             // 基础视图目录
             $module = isset($module) ? $module : $request->module();
-            $path   = $viewBase . ($module ? $module . DS : '');
+            $path   = $viewBase . ($module ? $module . DIRECTORY_SEPARATOR : '');
         } else {
-            $path = isset($module) ? APP_PATH . $module . DS . 'view' . DS : config('template.view_path');
+            $path = isset($module) ? APP_PATH . $module . DIRECTORY_SEPARATOR . 'view' . DIRECTORY_SEPARATOR : config('template.view_path');
         }
 
         $depr = config('template.view_depr');
@@ -121,9 +150,9 @@ class HomeBaseController extends BaseController
             if ($controller) {
                 if ('' == $template) {
                     // 如果模板文件名为空 按照默认规则定位
-                    $template = str_replace('.', DS, $controller) . $depr . $request->action();
+                    $template = str_replace('.', DIRECTORY_SEPARATOR, $controller) . $depr . cmf_parse_name($request->action(true));
                 } elseif (false === strpos($template, $depr)) {
-                    $template = str_replace('.', DS, $controller) . $depr . $template;
+                    $template = str_replace('.', DIRECTORY_SEPARATOR, $controller) . $depr . $template;
                 }
             }
         } else {
@@ -150,14 +179,16 @@ class HomeBaseController extends BaseController
             $themeModel->updateTheme($theme);
         }
 
-        $themePath = config('cmf_theme_path');
+        $themePath = config('template.cmf_theme_path');
         $file      = str_replace('\\', '/', $file);
         $file      = str_replace('//', '/', $file);
-        $file      = str_replace(['.html', '.php', $themePath . $theme . "/"], '', $file);
+        $webRoot   = str_replace('\\', '/', WEB_ROOT);
+        $themeFile = str_replace(['.html', '.php', $themePath . $theme . "/", $webRoot], '', $file);
 
-        $files = Db::name('theme_file')->field('more')->where(['theme' => $theme])->where(function ($query) use ($file) {
-            $query->where(['is_public' => 1])->whereOr(['file' => $file]);
-        })->select();
+        $files = Db::name('theme_file')->field('more')->where('theme', $theme)
+            ->where(function ($query) use ($themeFile) {
+                $query->where('is_public', 1)->whereOr('file', $themeFile);
+            })->select();
 
         $vars    = [];
         $widgets = [];
@@ -179,13 +210,24 @@ class HomeBaseController extends BaseController
                         }
                     }
 
-                    $widget['vars']       = $widgetVars;
-                    $widgets[$widgetName] = $widget;
+                    $widget['vars'] = $widgetVars;
+                    //如果重名，则合并配置
+                    if (empty($widgets[$widgetName])) {
+                        $widgets[$widgetName] = $widget;
+                    } else {
+                        foreach ($widgets[$widgetName] as $key => $value) {
+                            if (is_array($widget[$key])) {
+                                $widgets[$widgetName][$key] = array_merge($widgets[$widgetName][$key], $widget[$key]);
+                            } else {
+                                $widgets[$widgetName][$key] = $widget[$key];
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        return ['vars' => $vars, 'widgets' => $widgets];
+        return ['vars' => $vars, 'widgets' => $widgets, 'file' => $themeFile];
     }
 
     public function checkUserLogin()

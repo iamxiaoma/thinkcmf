@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkCMF [ WE CAN DO IT MORE SIMPLE ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2013-2018 http://www.thinkcmf.com All rights reserved.
+// | Copyright (c) 2013-2019 http://www.thinkcmf.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +---------------------------------------------------------------------
@@ -31,7 +31,7 @@ class Cmf extends TagLib
         'slides'              => ['attr' => 'id', 'close' => 1],//非必须属性item
         'noslides'            => ['attr' => 'id', 'close' => 1],
         'captcha'             => ['attr' => 'height,width', 'close' => 0],//非必须属性font-size,length,bg,id
-        'hook'                => ['attr' => 'name,param', 'close' => 0]
+        'hook'                => ['attr' => 'name,param,once', 'close' => 0]
     ];
 
     /**
@@ -101,7 +101,7 @@ parse;
         $root                    = isset($tag['root']) ? $tag['root'] : 'ul';
         $class                   = isset($tag['class']) ? $tag['class'] : 'nav navbar-nav';
         $maxLevel                = isset($tag['max-level']) ? intval($tag['max-level']) : 0;
-        $parseNavigationFuncName = '__parse_navigation' . md5(uniqid('_nav' . $navId . __LINE__, true));
+        $parseNavigationFuncName = '__parse_navigation_' . md5($navId.$id.$class);
 
         if (strpos($navId, '$') === 0) {
             $this->autoBuildVar($navId);
@@ -111,15 +111,19 @@ parse;
 
         $parse = <<<parse
 <?php
-
-function {$parseNavigationFuncName}(\$menus,\$level=1){
-\$_parse_navigation_func_name = '{$parseNavigationFuncName}';
+/*start*/
+if (!function_exists('{$parseNavigationFuncName}')) {
+    function {$parseNavigationFuncName}(\$menus,\$level=1){
+        \$_parse_navigation_func_name = '{$parseNavigationFuncName}';
 ?>
-    <foreach name="menus" item="menu">
-    {$content}
-    </foreach>
+        <foreach name="menus" item="menu">
+        {$content}
+        </foreach>
+        
 <?php 
+    }
 }
+/*end*/
 ?>
 
 <?php
@@ -207,7 +211,7 @@ parse;
         $root                       = isset($tag['root']) ? $tag['root'] : 'ul';
         $class                      = isset($tag['class']) ? $tag['class'] : 'nav navbar-nav';
         $maxLevel                   = isset($tag['max-level']) ? intval($tag['max-level']) : 0;
-        $parseSubNavigationFuncName = '__parse_sub_navigation' . md5(uniqid('_nav' . $parent . $id . __LINE__, true));;
+        $parseSubNavigationFuncName = '__parse_sub_navigation_' . md5($id.$class);
 
         if (strpos($parent, '$') === 0) {
             $this->autoBuildVar($parent);
@@ -217,13 +221,15 @@ parse;
 
         $parse = <<<parse
 <?php
-function {$parseSubNavigationFuncName}(\$menus,\$level=1){
-\$_parse_sub_navigation_func_name = '{$parseSubNavigationFuncName}';
+if (!function_exists('{$parseSubNavigationFuncName}')) {
+    function {$parseSubNavigationFuncName}(\$menus,\$level=1){
+        \$_parse_sub_navigation_func_name = '{$parseSubNavigationFuncName}';
 ?>
-    <foreach name="menus" item="menu">
-    {$content}
-    </foreach>
+        <foreach name="menus" item="menu">
+        {$content}
+        </foreach>
 <?php 
+    }
 }
 ?>
 
@@ -321,6 +327,9 @@ parse;
     public function tagSlides($tag, $content)
     {
         $id    = empty($tag['id']) ? '0' : $tag['id'];
+        if (strpos($id, '$') === 0) {
+            $this->autoBuildVar($id);
+        }
         $item  = empty($tag['item']) ? 'vo' : $tag['item'];//循环变量名
         $parse = <<<parse
 <?php
@@ -341,6 +350,9 @@ parse;
     public function tagNoSlides($tag, $content)
     {
         $id    = empty($tag['id']) ? '0' : $tag['id'];
+        if (strpos($id, '$') === 0) {
+            $this->autoBuildVar($id);
+        }
         $parse = <<<parse
 <?php
     if(!isset(\$__SLIDE_ITEMS__)){
@@ -370,7 +382,7 @@ parse;
         $style    = empty($tag['style']) ? 'cursor: pointer;' : $tag['style'];
         $params   = ltrim("{$paramId}{$height}{$width}{$fontSize}{$length}{$bg}", '&');
         $parse    = <<<parse
-<php>\$__CAPTCHA_SRC=url('/captcha/new').'?{$params}';</php>
+<php>\$__CAPTCHA_SRC=url('/new_captcha').'?{$params}';</php>
 <img src="{\$__CAPTCHA_SRC}" onclick="this.src='{\$__CAPTCHA_SRC}&time='+Math.random();" title="{$title}" class="captcha captcha-img verify_img" style="{$style}"/>{$content}
 <input type="hidden" name="_captcha_id" value="{$id}">
 parse;
@@ -381,25 +393,17 @@ parse;
     {
         $name  = empty($tag['name']) ? '' : $tag['name'];
         $param = empty($tag['param']) ? '' : $tag['param'];
-        $extra = empty($tag['extra']) ? '' : $tag['extra'];
         $once  = empty($tag['once']) ? 'false' : 'true';
 
         if (empty($param)) {
-            $param = '$temp' . uniqid();
+            $param = 'null';
         } else if (strpos($param, '$') === false) {
             $this->autoBuildVar($param);
         }
 
-        if (empty($extra)) {
-            $extra = "null";
-        } else if (strpos($extra, '$') === false) {
-            $this->autoBuildVar($extra);
-        }
-
-
         $parse = <<<parse
 <php>
-    \\think\\Hook::listen('{$name}',{$param},{$extra},{$once});
+    \\think\\facade\\Hook::listen('{$name}',{$param},{$once});
 </php>
 parse;
         return $parse;

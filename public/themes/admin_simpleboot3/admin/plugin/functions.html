@@ -1,5 +1,6 @@
 <php>
-    function _parse_plugin_config($pluginConfig){
+    if (!function_exists('_parse_plugin_config')) {
+        function _parse_plugin_config($pluginConfig){
 
 </php>
 
@@ -14,7 +15,7 @@
                     </notempty>
                 </label>
                 <div class="col-md-6 col-sm-10">
-                    <p>{$form.value}</p>
+                    <p class="form-control-static">{$form.value}</p>
                     <present name="form.tip">
                         <p class="help-block">{$form.tip}</p>
                     </present>
@@ -300,7 +301,7 @@
     </switch>
 </foreach>
 
-
 <php>
+        }
     }
 </php>

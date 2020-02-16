@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkCMF [ WE CAN DO IT MORE SIMPLE ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2013-2018 http://www.thinkcmf.com All rights reserved.
+// | Copyright (c) 2013-2019 http://www.thinkcmf.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +---------------------------------------------------------------------
@@ -12,12 +12,13 @@
 namespace cmf\controller;
 
 use think\captcha\Captcha;
+use think\facade\Config;
 use think\Request;
 
 class CaptchaController
 {
     /**
-     * captcha/new?height=50&width=200&font_size=25&length=4&bg=243,251,254&id=1
+     * new_captcha?height=50&width=200&font_size=25&length=4&bg=243,251,254&id=1
      * @param Request $request
      * @return \think\Response
      */
@@ -26,37 +27,34 @@ class CaptchaController
         $config = [
             // 验证码字体大小(px)
             'fontSize' => 25,
-            // 验证码字体大小(px)
-            'useCurve' => true,
-            // 是否画混淆曲线
-            'useNoise' => true,
             // 验证码图片高度
-            'imageH'   => 0,
+            'imageH'   => 38,
             // 验证码图片宽度
-            'imageW'   => 0,
+            'imageW'   => 120,
             // 验证码位数
             'length'   => 4,
             // 背景颜色
-            'bg'       => [243, 251, 254],
+            'bg'       => [255, 255, 255],
         ];
 
         $fontSize = $request->param('font_size', 25, 'intval');
-        if ($fontSize > 8) {
+        if ($fontSize > 8 && $fontSize < 100) {
             $config['fontSize'] = $fontSize;
         }
 
+
         $imageH = $request->param('height', '');
-        if ($imageH != '') {
+        if ($imageH != '' && $imageH < 100) {
             $config['imageH'] = intval($imageH);
         }
 
         $imageW = $request->param('width', '');
-        if ($imageW != '') {
+        if ($imageW != '' && $imageW < 200) {
             $config['imageW'] = intval($imageW);
         }
 
         $length = $request->param('length', 4, 'intval');
-        if ($length > 2) {
+        if ($length > 2 && $length <= 100) {
             $config['length'] = $length;
         }
 
@@ -72,16 +70,20 @@ class CaptchaController
 
         $id = $request->param('id', 0, 'intval');
         if ($id > 5 || empty($id)) {
-            $id = '';
+            $id                   = '';
+            $config['captcha_id'] = $id;
         }
 
-        $defaultCaptchaConfig = config('captcha');
-        if ($defaultCaptchaConfig && is_array($defaultCaptchaConfig)) {
-            $config = array_merge($defaultCaptchaConfig, $config);
+        $response = hook_one('captcha_image', $config);
+        if (empty($response)) {
+            $defaultCaptchaConfig = (array)Config::pull('captcha');
+            if ($defaultCaptchaConfig && is_array($defaultCaptchaConfig)) {
+                $config = array_merge($defaultCaptchaConfig, $config);
+            }
+            $captcha  = new Captcha($config);
+            $response = $captcha->entry($id);
         }
-        $captcha = new Captcha($config);
-
-        @ob_clean();// 清除输出缓存 
-        return $captcha->entry($id);
+        @ob_clean();// 清除输出缓存
+        return $response;
     }
 }

@@ -4,20 +4,23 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit929fb365b9981d29459d58f676689cf7
+class ComposerStaticInit5bfecc6fb5e853e2f790c7db297fb8ee
 {
     public static $files = array (
-        '9b552a3cc426e3287cc811caefa3cf53' => __DIR__ . '/..' . '/topthink/think-helper/src/helper.php',
-        '841780ea2e1d6545ea3a253239d59c05' => __DIR__ . '/..' . '/qiniu/php-sdk/src/Qiniu/functions.php',
         '2cffec82183ee1cea088009cef9a6fc3' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.composer.php',
         '1cfd2761b63b0a29ed23657ea394cb2d' => __DIR__ . '/..' . '/topthink/think-captcha/src/helper.php',
-        'cc56288302d9df745d97c934d6a6e5f0' => __DIR__ . '/..' . '/topthink/think-queue/src/common.php',
-        '17da1109dc7f2cc925f08d705373410b' => __DIR__ . '/..' . '/thinkcmf/cmf/src/common.php',
+        '22ae91e0a0181f0ca9a02b9dde87e558' => __DIR__ . '/..' . '/thinkcmf/cmf/src/common.php',
+        '9b552a3cc426e3287cc811caefa3cf53' => __DIR__ . '/..' . '/topthink/think-helper/src/helper.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'w' => 
+        array (
+            'wxapp\\' => 6,
+        ),
         't' => 
         array (
+            'tree\\' => 5,
             'think\\helper\\' => 13,
             'think\\composer\\' => 15,
             'think\\captcha\\' => 14,
@@ -27,25 +30,35 @@ class ComposerStaticInit929fb365b9981d29459d58f676689cf7
         array (
             'mindplay\\annotations\\' => 21,
         ),
+        'd' => 
+        array (
+            'dir\\' => 4,
+        ),
         'c' => 
         array (
             'cmf\\' => 4,
         ),
-        'Q' => 
+        'a' => 
         array (
-            'Qiniu\\' => 6,
+            'app\\install\\' => 12,
+            'app\\' => 4,
+            'api\\' => 4,
         ),
-        'F' => 
+        'P' => 
         array (
-            'FontLib\\' => 8,
-        ),
-        'D' => 
-        array (
-            'Dompdf\\' => 7,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'wxapp\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/thinkcmf/cmf-extend/src/wxapp',
+        ),
+        'tree\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/thinkcmf/cmf-extend/src/tree',
+        ),
         'think\\helper\\' => 
         array (
             0 => __DIR__ . '/..' . '/topthink/think-helper/src',
@@ -60,50 +73,39 @@ class ComposerStaticInit929fb365b9981d29459d58f676689cf7
         ),
         'think\\' => 
         array (
-            0 => __DIR__ . '/..' . '/topthink/think-queue/src',
-            1 => __DIR__ . '/..' . '/topthink/think-image/src',
+            0 => __DIR__ . '/..' . '/topthink/think-image/src',
         ),
         'mindplay\\annotations\\' => 
         array (
             0 => __DIR__ . '/..' . '/mindplay/annotations/src/annotations',
         ),
+        'dir\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/thinkcmf/cmf-extend/src/dir',
+        ),
         'cmf\\' => 
         array (
             0 => __DIR__ . '/..' . '/thinkcmf/cmf/src',
         ),
-        'Qiniu\\' => 
+        'app\\install\\' => 
         array (
-            0 => __DIR__ . '/..' . '/qiniu/php-sdk/src/Qiniu',
+            0 => __DIR__ . '/..' . '/thinkcmf/cmf-install/src',
         ),
-        'FontLib\\' => 
+        'app\\' => 
         array (
-            0 => __DIR__ . '/..' . '/phenx/php-font-lib/src/FontLib',
+            0 => __DIR__ . '/..' . '/thinkcmf/cmf-app/src',
         ),
-        'Dompdf\\' => 
+        'api\\' => 
         array (
-            0 => __DIR__ . '/..' . '/dompdf/dompdf/src',
+            0 => __DIR__ . '/..' . '/thinkcmf/cmf-api/src',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
     );
 
     public static $prefixesPsr0 = array (
-        'S' => 
-        array (
-            'Svg\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/phenx/php-svg-lib/src',
-            ),
-            'Sabberworm\\CSS' => 
-            array (
-                0 => __DIR__ . '/..' . '/sabberworm/php-css-parser/lib',
-            ),
-        ),
-        'P' => 
-        array (
-            'PHPExcel' => 
-            array (
-                0 => __DIR__ . '/..' . '/phpoffice/phpexcel/Classes',
-            ),
-        ),
         'H' => 
         array (
             'HTMLPurifier' => 
@@ -120,22 +122,9 @@ class ComposerStaticInit929fb365b9981d29459d58f676689cf7
         'CallbackParameterToReference' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/Callback.php',
         'CallbackReturnReference' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/Callback.php',
         'CallbackReturnValue' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/Callback.php',
-        'Cpdf' => __DIR__ . '/..' . '/dompdf/dompdf/lib/Cpdf.php',
         'DOMDocumentWrapper' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/DOMDocumentWrapper.php',
         'DOMEvent' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/DOMEvent.php',
-        'EasyPeasyICS' => __DIR__ . '/..' . '/phpmailer/phpmailer/extras/EasyPeasyICS.php',
-        'HTML5_Data' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/Data.php',
-        'HTML5_InputStream' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/InputStream.php',
-        'HTML5_Parser' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/Parser.php',
-        'HTML5_Tokenizer' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/Tokenizer.php',
-        'HTML5_TreeBuilder' => __DIR__ . '/..' . '/dompdf/dompdf/lib/html5lib/TreeBuilder.php',
         'ICallbackNamed' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/Callback.php',
-        'PHPMailer' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmailer.php',
-        'PHPMailerOAuth' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmaileroauth.php',
-        'PHPMailerOAuthGoogle' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmaileroauthgoogle.php',
-        'POP3' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.pop3.php',
-        'SMTP' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.smtp.php',
-        'ntlm_sasl_client_class' => __DIR__ . '/..' . '/phpmailer/phpmailer/extras/ntlm_sasl_client.php',
         'phpQuery' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery.php',
         'phpQueryEvents' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/phpQueryEvents.php',
         'phpQueryObject' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/phpQueryObject.php',
@@ -146,16 +135,18 @@ class ComposerStaticInit929fb365b9981d29459d58f676689cf7
         'phpQueryPlugin_WebBrowser' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/plugins/WebBrowser.php',
         'phpQueryPlugin_example' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/plugins/example.php',
         'phpQueryPlugins' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery.php',
-        'phpmailerException' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmailer.php',
+        'think\\App' => __DIR__ . '/..' . '/thinkcmf/cmf/src/App.php',
+        'think\\Log' => __DIR__ . '/..' . '/thinkcmf/cmf/src/Log.php',
+        'think\\route\\dispatch\\Module' => __DIR__ . '/..' . '/thinkcmf/cmf/src/route/dispatch/Module.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit929fb365b9981d29459d58f676689cf7::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit929fb365b9981d29459d58f676689cf7::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit929fb365b9981d29459d58f676689cf7::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit929fb365b9981d29459d58f676689cf7::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit5bfecc6fb5e853e2f790c7db297fb8ee::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit5bfecc6fb5e853e2f790c7db297fb8ee::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit5bfecc6fb5e853e2f790c7db297fb8ee::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit5bfecc6fb5e853e2f790c7db297fb8ee::$classMap;
 
         }, null, ClassLoader::class);
     }

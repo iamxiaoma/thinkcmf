@@ -220,7 +220,15 @@
                                         callback: {
                                             afterClose: function () {
                                                 if ($btn.data('refresh') == undefined || $btn.data('refresh')) {
-                                                    _refresh();
+
+                                                    if ($btn.data('success_refresh')) {
+                                                        var successRefreshCallback = $btn.data('success_refresh');
+                                                        window[successRefreshCallback](data, statusText, xhr, $form);
+                                                        return;
+                                                    } else {
+                                                        _refresh();
+                                                    }
+
                                                 }
                                             }
                                         }
@@ -303,7 +311,7 @@
     if ($('a.js-ajax-delete').length) {
         Wind.css('artDialog');
         Wind.use('artDialog', 'noty', function () {
-            $('.js-ajax-delete').on('click', function (e) {
+            $('body').on('click', '.js-ajax-delete', function (e) {
                 e.preventDefault();
                 var $_this  = this,
                     $this   = $($_this),
@@ -449,6 +457,60 @@
         });
     }
 
+    if ($('a.js-ajax-btn').length) {
+        Wind.use('noty', function () {
+            $('.js-ajax-btn').on('click', function (e) {
+                e.preventDefault();
+                var $_this = this,
+                    $this  = $($_this),
+                    href   = $this.data('href'),
+                    msg    = $this.data('msg');
+                refresh    = $this.data('refresh');
+                href       = href ? href : $this.attr('href');
+                refresh    = refresh == undefined ? 1 : refresh;
+
+
+                $.getJSON(href).done(function (data) {
+                    if (data.code == 1) {
+                        noty({
+                            text: data.msg,
+                            type: 'success',
+                            layout: 'center',
+                            callback: {
+                                afterClose: function () {
+                                    if (data.url) {
+                                        location.href = data.url;
+                                        return;
+                                    }
+
+                                    if (refresh || refresh == undefined) {
+                                        reloadPage(window);
+                                    }
+                                }
+                            }
+                        });
+                    } else if (data.code == 0) {
+                        noty({
+                            text: data.msg,
+                            type: 'error',
+                            layout: 'center',
+                            callback: {
+                                afterClose: function () {
+                                    if (data.url) {
+                                        location.href = data.url;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+
+            });
+
+        });
+    }
+
+
     /*复选框全选(支持多个，纵横双控全选)。
      *实例：版块编辑-权限相关（双控），验证机制-验证策略（单控）
      *说明：
@@ -469,7 +531,9 @@
             //分组各纵横项
             var check_all_direction = check_all.data('direction');
             check_items             = $('input.js-check[data-' + check_all_direction + 'id="' + check_all.data('checklist') + '"]').not(":disabled");
-
+            if($('.js-check-all').is(':checked')) {
+                check_items.prop('checked', true);
+            }
             //点击全选框
             check_all.change(function (e) {
                 var check_wrap = check_all.parents('.js-check-wrap'); //当前操作区域所有复选框的父标签（重用考虑）
@@ -547,6 +611,22 @@
         });
     }
 
+    // bootstrap年选择器
+    var bootstrapYearInput = $("input.js-bootstrap-year")
+    if (bootstrapYearInput.length) {
+        Wind.css('bootstrapDatetimePicker');
+        Wind.use('bootstrapDatetimePicker', function () {
+            bootstrapYearInput.datetimepicker({
+                language: 'zh-CN',
+                format: 'yyyy',
+                minView: 'decade',
+                startView: 'decade',
+                todayBtn: 1,
+                autoclose: true
+            });
+        });
+    }
+
     // bootstrap日期选择器
     var bootstrapDateInput = $("input.js-bootstrap-date")
     if (bootstrapDateInput.length) {
@@ -556,6 +636,22 @@
                 language: 'zh-CN',
                 format: 'yyyy-mm-dd',
                 minView: 'month',
+                todayBtn: 1,
+                autoclose: true
+            });
+        });
+    }
+
+    // bootstrap年月份选择器
+    var bootstrapYearMonthInput = $("input.js-bootstrap-year-month");
+    if (bootstrapYearMonthInput.length) {
+        Wind.css('bootstrapDatetimePicker');
+        Wind.use('bootstrapDatetimePicker', function () {
+            bootstrapYearMonthInput.datetimepicker({
+                language: 'zh-CN',
+                format: 'yyyy-mm',
+                minView: 'year',
+                startView: 'decade',
                 todayBtn: 1,
                 autoclose: true
             });
@@ -819,11 +915,13 @@ function openUploadDialog(dialog_title, callback, extra_params, multi, filetype,
  * @param app  应用名,CMF的应用名
  */
 function uploadOne(dialog_title, input_selector, filetype, extra_params, app) {
-    filetype   = filetype ? filetype : 'file';
+    filetype = filetype ? filetype : 'file';
     openUploadDialog(dialog_title, function (dialog, files) {
         $(input_selector).val(files[0].filepath);
         $(input_selector + '-preview').attr('href', files[0].preview_url);
+
         $(input_selector + '-name').val(files[0].name);
+        $(input_selector + '-name-text').text(files[0].name);
     }, extra_params, 0, filetype, app);
 }
 
@@ -838,7 +936,10 @@ function uploadOneImage(dialog_title, input_selector, extra_params, app) {
     openUploadDialog(dialog_title, function (dialog, files) {
         $(input_selector).val(files[0].filepath);
         $(input_selector + '-preview').attr('src', files[0].preview_url);
+
         $(input_selector + '-name').val(files[0].name);
+        $(input_selector + '-name-text').text(files[0].name);
+
     }, extra_params, 0, 'image', app);
 }
 

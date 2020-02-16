@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkCMF [ WE CAN DO IT MORE SIMPLE ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2013-2018 http://www.thinkcmf.com All rights reserved.
+// | Copyright (c) 2013-2019 http://www.thinkcmf.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +---------------------------------------------------------------------
@@ -111,7 +111,7 @@ class Database extends DataBaseConnector
             ->update([
                 'reserved'     => 0,
                 'reserve_time' => null,
-                'attempts'     => ['exp', 'attempts + 1']
+                'attempts'     => $this->db->raw('attempts + 1')
             ]);
     }
 
